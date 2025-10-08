@@ -6,7 +6,7 @@
     <title>Russian Club - Forgot Password</title>
     
     <style>
-        /* ------------------- MAIN STYLES ------------------- */
+        /* ------------------- MAIN STYLES (NO CHANGE) ------------------- */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -166,10 +166,10 @@
         }
         /* Recaptcha container styling for visibility */
         #recaptcha-container {
-            margin-top: 15px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: center;
+            /* This div MUST be visible for Invisible Recaptcha to render, but it will be visually hidden */
+            height: 0;
+            overflow: hidden; 
+            opacity: 0;
         }
     </style>
 </head>
@@ -189,10 +189,10 @@
         <form id="forgotForm">
             <div id="phone-input-group" class="input-group">
                 <img src="https://img.icons8.com/ios-filled/20/aaaaaa/phone.png" alt="Phone Icon">
-                <input type="tel" id="forgot-phone" class="auth-input" placeholder="Enter Phone Number (e.g., +91XXXXXXXXXX or XXXXXXXXXX)" required>
+                <input type="tel" id="forgot-phone" class="auth-input" placeholder="Enter Phone Number (e.g., +91XXXXXXXXXX)" required>
             </div>
             
-            <div id="recaptcha-container"></div>
+            <div id="recaptcha-container"></div> 
 
             <div id="otp-input-container">
                 <input type="number" class="otp-input" id="otp-1" maxlength="1" required>
@@ -218,6 +218,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
+    // ⚠️ IMPORTANT: These keys are publicly exposed and should be treated as such.
     var firebaseConfig = {
         apiKey: "AIzaSyDlEY_2bDv25T5GTCzTEk7sQIZR-axh5irc",
         authDomain: "russian-club.firebaseapp.com",
@@ -230,7 +231,7 @@
     };
 
     if (!window.firebase) {
-         alert("CRITICAL ERROR: Firebase SDK not loaded. Check your internet or browser security settings.");
+          alert("CRITICAL ERROR: Firebase SDK not loaded. Check your internet or browser security settings.");
     }
 
     if (!firebase.apps.length) { 
@@ -241,19 +242,21 @@
         }
     }
     
-    if (!firebase.auth || !firebase.firestore) {
-        alert("CRITICAL ERROR: Firebase Auth/Firestore SDKs not initialized. Scripts blocked.");
-    }
-
     const auth = firebase.auth();
     const db = firebase.firestore();
 
     let currentStep = 1; 
     let confirmationResult = null; 
     let userDocId = null; 
-    let fullPhoneNumber = null; // Variable to store the phone number in +E.164 format for Firebase Auth
+    let fullPhoneNumber = null; 
 
     // --- Utility Functions ---
+
+    /**
+     * Hashes the password using SHA-256 for secure storage in Firestore.
+     * @param {string} password - The plaintext password.
+     * @returns {Promise<string>} - The hashed password string.
+     */
     async function hashPassword(password) {
         const msgBuffer = new TextEncoder().encode(password);
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -271,8 +274,8 @@
     function setupOtpInputs() {
         const inputs = document.querySelectorAll('.otp-input');
         inputs.forEach((input, index) => {
+            // Limits input to 1 digit
             input.addEventListener('input', (e) => {
-                // Limit input to 1 digit
                 if (input.value.length > 1) {
                     input.value = input.value.slice(0, 1);
                 }
@@ -285,9 +288,9 @@
             });
             // Auto-advance on paste for the first input
             if (index === 0) {
-                 input.addEventListener('paste', (e) => {
+                input.addEventListener('paste', (e) => {
                     const paste = e.clipboardData.getData('text');
-                    if (paste.length === inputs.length) {
+                    if (paste.length === inputs.length && !isNaN(paste)) { // Check length and ensure it's numeric
                         e.preventDefault();
                         Array.from(paste).forEach((char, i) => {
                             if (i < inputs.length) {
@@ -312,14 +315,17 @@
         const submitBtn = document.getElementById('submit-btn');
         const recaptchaContainer = document.getElementById('recaptcha-container');
 
-        // Invisible Recaptcha Initialization
+        // 1. Firebase Invisible Recaptcha Initialization
         window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(recaptchaContainer, {
             'size': 'invisible', 
             'callback': (response) => {
-                displayError("Verification complete. Click GET OTP.");
+                // Since this is invisible, the callback runs automatically before the sign-in is attempted.
+                console.log("Recaptcha challenge passed successfully.");
             },
             'expired-callback': () => {
-                displayError("Recaptcha expired. Please try again.");
+                displayError("Recaptcha expired. Please refresh and retry.");
+                // Resetting for safety
+                if (window.recaptchaVerifier) window.recaptchaVerifier.clear();
             }
         });
 
@@ -327,7 +333,7 @@
             console.log("Invisible Recaptcha ready:", widgetId);
         }).catch(function(error) {
             console.error("Recaptcha Render Error:", error);
-            displayError(`Recaptcha Render Failed. Error: ${error.code}`); 
+            displayError(`Recaptcha Render Failed. Error: ${error.code}. Check Firebase console settings.`); 
         });
 
 
@@ -340,6 +346,7 @@
 
             // Step 1: Send OTP 
             if (currentStep === 1) {
+                // Basic Phone Number Check
                 if (phone.length < 10) {
                     displayError("Please enter a valid phone number (min 10 digits).");
                     return;
@@ -351,21 +358,18 @@
                 try {
                     let userQuery;
                     
-                    // Firestore is saving data WITHOUT +91, so we check the input AS-IS first
-                    // 1. Check if the phone number exists in Firestore (AS-IS, e.g., '1234567890')
-                    userQuery = await db.collection('users').where('phone', '==', phone).limit(1).get();
-                    
+                    // Standardize phone input to +E.164 for Firestore search, assuming IN if '+' is missing.
+                    let searchPhone = phone.startsWith('+') ? phone : `+91${phone}`;
+
+                    // 1. Search Firestore for the user document (by +E.164 format)
+                    userQuery = await db.collection('users').where('phone', '==', searchPhone).limit(1).get();
+
                     if (userQuery.empty) {
-                        // 2. If not found AS-IS, check if the phone is entered with +91 (e.g., '+911234567890')
-                        // and try to search Firestore with the stripped number (e.g., '1234567890')
-                         if (phone.startsWith('+')) {
-                            const cleanPhone = phone.replace(/^\+91/, '').replace(/^\+/, '');
-                            userQuery = await db.collection('users').where('phone', '==', cleanPhone).limit(1).get();
-                        } else {
-                            // 3. If phone is entered without '+', assume it's Indian number and search for '+91...' format in Firestore
-                            const plus91Phone = `+91${phone}`;
-                            userQuery = await db.collection('users').where('phone', '==', plus91Phone).limit(1).get();
-                        }
+                         // Fallback search for numbers stored without +91 (10-digit only)
+                         if (searchPhone.startsWith('+91')) {
+                            const tenDigitPhone = searchPhone.substring(3);
+                            userQuery = await db.collection('users').where('phone', '==', tenDigitPhone).limit(1).get();
+                         }
                     }
 
                     if (userQuery.empty) {
@@ -375,52 +379,50 @@
                          return;
                     }
                     
-                    // Phone number is found in Firestore. Now determine the correct +E.164 format for Firebase Auth.
+                    // Phone number is found in Firestore. Now get the document ID and determine the final +E.164 format for Auth.
                     userDocId = userQuery.docs[0].id;
-                    const dbPhone = userQuery.docs[0].data().phone; // This is the phone format stored in DB
                     
-                    // Determine the correct phone number format for Firebase Auth (must be +E.164)
-                    if (dbPhone.startsWith('+')) {
-                        fullPhoneNumber = dbPhone; // DB already has +E.164 format
-                    } else if (dbPhone.length === 10) {
-                        fullPhoneNumber = `+91${dbPhone}`; // Assume 10-digit numbers are Indian
-                    } else {
-                        // If DB data is inconsistent, use the input as fallback for now (risky, but keeps flow moving)
-                        fullPhoneNumber = phone.startsWith('+') ? phone : `+91${phone}`; 
-                    }
+                    // Use the phone number from the DB (or the user's input if DB is 10-digit)
+                    const dbPhone = userQuery.docs[0].data().phone; 
                     
-                    submitBtn.textContent = 'SENDING...'; // Update button text again
+                    // Final check to ensure +E.164 for Firebase Auth
+                    fullPhoneNumber = dbPhone.startsWith('+') ? dbPhone : `+91${dbPhone}`;
 
-                    // 4. Firebase Auth: Send Verification Code
+                    submitBtn.textContent = 'SENDING...';
+
+                    // 2. Firebase Auth: Send Verification Code
+                    // This automatically triggers the invisible Recaptcha challenge if not already passed.
                     confirmationResult = await auth.signInWithPhoneNumber(fullPhoneNumber, window.recaptchaVerifier);
                     
                     // UI update for Step 2
                     document.getElementById('phone-input-group').style.display = 'none';
                     otpContainer.style.display = 'flex';
-                    recaptchaContainer.style.display = 'none'; 
+                    // We can clear and hide the RecaptchaVerifier element since the challenge passed
+                    window.recaptchaVerifier.clear();
+                    
                     submitBtn.textContent = 'VERIFY OTP';
                     submitBtn.disabled = false;
                     currentStep = 2;
-                    displayError(`OTP sent successfully to ${fullPhoneNumber}. Please check your phone.`);
+                    displayError(`OTP sent successfully to ${fullPhoneNumber}. Please enter the code.`);
 
                 } catch (error) {
                     console.error("OTP Send Error:", error.code, error.message);
                     
-                    if (error.code === 'auth/missing-verification-code' || error.code === 'auth/captcha-check-failed') {
-                           displayError("Verification check failed. Refresh and retry.");
-                    } else if (error.code === 'auth/unauthorized-domain') {
-                           displayError("Domain not authorized. Check Firebase console.");
-                    } else {
-                           displayError(`OTP Failed. Error: ${error.code}. Check phone format and try again.`);
+                    // Handle specific Firebase errors
+                    let errorMessage = `OTP Failed. Error: ${error.message}.`;
+                    if (error.code === 'auth/invalid-phone-number') {
+                        errorMessage = "Invalid phone number format. Please include the country code (e.g., +91).";
+                    } else if (error.code === 'auth/captcha-check-failed' || error.code === 'auth/internal-error') {
+                        errorMessage = "Security verification failed. Please try again in a few moments.";
                     }
                     
+                    displayError(errorMessage);
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'GET OTP';
                 }
 
             // Step 2: Verify OTP 
             } else if (currentStep === 2) {
-                // FIXED: Checking for 6 digits
                 if (enteredOTP.length !== 6) { displayError("Please enter the complete 6-digit OTP."); return; }
                 if (!confirmationResult) { displayError("Verification process not started. Try again."); return; }
 
@@ -440,7 +442,7 @@
 
                 } catch (error) {
                     console.error("OTP Verify Error:", error.code, error.message);
-                    displayError("Invalid OTP. Please try again or resend.");
+                    displayError("Invalid OTP. Please try again or click GET OTP to resend.");
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'VERIFY OTP';
                 }
@@ -456,10 +458,12 @@
                     const hashedPassword = await hashPassword(password);
                     if (!userDocId) { throw new Error("User ID missing. Please refresh and try again."); }
                     
+                    // Update the Hashed Password in the Firestore Document
                     await db.collection('users').doc(userDocId).update({ password: hashedPassword });
                     
                     alert("Password reset successful! Please login with your new password.");
-                    window.location.href = 'login.html';
+                    // Redirect to login page (assuming login.html exists)
+                    window.location.href = 'login.html'; 
 
                 } catch (error) {
                     console.error("Password Update Error:", error);
@@ -471,11 +475,6 @@
         });
     });
     
-    // 🔥 FINAL FIX: Temporary Global Error Catcher 🔥
-    window.onerror = function(message, source, lineno, colno, error) {
-        alert("JS ERROR (Line " + lineno + "): " + message);
-        return true; 
-    };
 </script>
 
 </body>
