@@ -8,93 +8,71 @@
 body {
     font-family: Arial, sans-serif;
     margin: 0; padding: 0;
-    background-color: #1a1a1a;
+    background: #1a1a1a;
     color: #f0f0f0;
-    min-height: 100vh;
-    display: flex; justify-content: center; align-items: flex-start;
+    display: flex; flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
     padding-top: 10vh;
 }
 .container {
-    max-width: 450px; width: 95%; margin: 0 auto;
-    display: flex; flex-direction: column; align-items: center;
+    max-width: 450px; width: 95%;
 }
-.page-header { width: 100%; text-align: center; margin-bottom: 30px; }
-.header-text { line-height: 1.2; display: inline-flex; align-items: center; font-size: 1.8em; font-weight: 800; text-shadow: 0 2px 6px rgba(0,0,0,0.6); }
-.header-text span { padding: 5px 10px; }
-.header-text .russian-color { color: #e50074; background: rgba(255,255,255,0.9); border-radius: 8px 0 0 8px; font-weight:900; }
-.header-text .club-color { color:white; background:transparent; border:1px solid rgba(255,255,255,0.25); border-radius:0 8px 8px 0; font-weight:700; }
-
 .auth-card {
-    width: 90%; padding: 25px 20px; border-radius:18px;
     background: rgba(255,255,255,0.05);
-    backdrop-filter: blur(10px) saturate(180%);
-    -webkit-backdrop-filter: blur(10px) saturate(180%);
-    border:1px solid rgba(255,255,255,0.2);
-    box-shadow:0 8px 32px rgba(0,0,0,0.3);
-    overflow:hidden; box-sizing:border-box;
+    backdrop-filter: blur(10px);
+    padding: 25px 20px;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.2);
 }
-.auth-card h2 { text-align:center; margin-top:0; margin-bottom:25px; font-size:1.6em; color:#ffc700; text-shadow:0 0 8px rgba(255,199,0,0.5); }
-
-.input-group { margin-bottom:18px; position:relative; }
-.input-group > img { position:absolute; left:15px; top:50%; transform:translateY(-50%); width:20px; height:20px; filter: invert(70%); }
-.auth-input { width:100%; padding:12px 12px 12px 50px; border:1px solid rgba(255,255,255,0.3); border-radius:10px; background-color: rgba(0,0,0,0.3); color:#f0f0f0; font-size:1em; box-sizing:border-box; transition:border-color 0.3s, box-shadow 0.3s; }
-.auth-input:focus { border-color:#ffc700; box-shadow:0 0 8px rgba(255,199,0,0.5); outline:none; }
-.auth-input::placeholder { color:#aaa; }
-
-#otp-input-container { display:flex; justify-content:space-between; margin-bottom:25px; display:none; }
-.otp-input { width:15%; height:50px; text-align:center; font-size:1.5em; padding:5px; border:1px solid rgba(255,255,255,0.3); border-radius:8px; background-color: rgba(0,0,0,0.3); color:#f0f0f0; }
-
-#new-password-group { display:none; }
-.password-wrapper { position:relative; }
-.toggle-eye { position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; }
-
-.submit-button { width:100%; padding:15px; background: linear-gradient(90deg,#e50074,#ff0099); color:white; font-size:1.1em; font-weight:bold; border:none; border-radius:30px; cursor:pointer; transition:background 0.3s, transform 0.2s, box-shadow 0.3s; box-shadow:0 6px 15px rgba(229,0,116,0.4); }
-.submit-button:hover { background: linear-gradient(90deg,#ff0099,#e50074); transform:translateY(-2px); box-shadow:0 8px 20px rgba(229,0,116,0.6); }
-
-#error-message { color:#ffc700; text-align:center; margin-top:15px; font-weight:bold; display:none; }
-
-#recaptcha-container { margin-top:15px; margin-bottom:15px; display:flex; justify-content:center; }
+.auth-card h2 {
+    color: #ffc700; text-align: center;
+}
+.input-group { position: relative; margin-bottom: 18px; }
+.auth-input {
+    width: 100%; padding: 12px 12px 12px 40px;
+    border-radius: 10px; border: 1px solid rgba(255,255,255,0.3);
+    background-color: rgba(0,0,0,0.3); color: #f0f0f0;
+}
+.otp-input { width: 18%; height: 50px; text-align: center; font-size: 1.5em; margin-right: 5px; }
+.submit-button {
+    width: 100%; padding: 15px; border: none;
+    border-radius: 30px; font-weight: bold;
+    color: white; background: linear-gradient(90deg,#e50074,#ff0099);
+    cursor: pointer;
+}
+#recaptcha-container { margin: 15px 0; display: flex; justify-content: center; }
+#error-message { color: #ffc700; text-align: center; margin-bottom: 15px; display:none; }
+#otp-container, #new-password-group { display: none; }
 </style>
 </head>
 <body>
 
 <div class="container">
-<div class="page-header">
-    <div class="header-text">
-        <span class="russian-color">RUSSIAN</span><span class="club-color">CLUB</span>
+    <div class="auth-card">
+        <h2>Forgot Password</h2>
+        <div id="error-message"></div>
+        <form id="forgotForm">
+            <div class="input-group" id="phone-group">
+                <input type="tel" id="phone" class="auth-input" placeholder="Phone (+91XXXXXXXXXX)" required>
+            </div>
+            <div id="recaptcha-container"></div>
+
+            <div id="otp-container">
+                <input type="number" class="otp-input" maxlength="1" required>
+                <input type="number" class="otp-input" maxlength="1" required>
+                <input type="number" class="otp-input" maxlength="1" required>
+                <input type="number" class="otp-input" maxlength="1" required>
+                <input type="number" class="otp-input" maxlength="1" required>
+            </div>
+
+            <div class="input-group" id="new-password-group">
+                <input type="password" id="new-password" class="auth-input" placeholder="Enter new password" required>
+            </div>
+
+            <button type="submit" id="submit-btn" class="submit-button">GET OTP</button>
+        </form>
     </div>
-</div>
-
-<div class="auth-card">
-<h2>Forgot Password</h2>
-<div id="error-message"></div>
-
-<form id="forgotForm">
-    <div id="phone-input-group" class="input-group">
-        <img src="https://img.icons8.com/ios-filled/20/aaaaaa/phone.png" alt="Phone Icon">
-        <input type="tel" id="forgot-phone" class="auth-input" placeholder="Enter Phone Number (+91XXXXXXXXXX)" required>
-    </div>
-
-    <div id="recaptcha-container"></div>
-
-    <div id="otp-input-container">
-        <input type="text" class="otp-input" id="otp-1" maxlength="1" required>
-        <input type="text" class="otp-input" id="otp-2" maxlength="1" required>
-        <input type="text" class="otp-input" id="otp-3" maxlength="1" required>
-        <input type="text" class="otp-input" id="otp-4" maxlength="1" required>
-        <input type="text" class="otp-input" id="otp-5" maxlength="1" required>
-        <input type="text" class="otp-input" id="otp-6" maxlength="1" required>
-    </div>
-
-    <div id="new-password-group" class="input-group password-wrapper">
-        <img src="https://img.icons8.com/ios-filled/20/aaaaaa/lock.png" alt="Password Icon">
-        <input type="password" id="forgot-password" class="auth-input" placeholder="Enter New Password (min 6 chars)" required>
-        <span class="toggle-eye" onclick="togglePassword()">👁️</span>
-    </div>
-
-    <button type="submit" id="submit-btn" class="submit-button">GET OTP</button>
-</form>
-</div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -103,15 +81,14 @@ body {
 
 <script>
 var firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
+    apiKey: "PASTE_YOUR_FIREBASE_API_KEY_HERE",
     authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
     projectId: "YOUR_PROJECT_ID",
     storageBucket: "YOUR_PROJECT_ID.appspot.com",
     messagingSenderId: "YOUR_SENDER_ID",
     appId: "YOUR_APP_ID"
 };
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
@@ -121,89 +98,79 @@ let userDocId = null;
 
 function displayError(msg){
     const e = document.getElementById('error-message');
-    e.textContent = msg; e.style.display='block';
-    setTimeout(()=>{e.style.display='none'},5000);
+    e.style.display='block'; e.textContent=msg;
+    setTimeout(()=>{e.style.display='none';},5000);
 }
-function togglePassword(){
-    const pass = document.getElementById('forgot-password');
-    pass.type = (pass.type==='password')?'text':'password';
-}
+
 function setupOtpInputs(){
-    const inputs=document.querySelectorAll('.otp-input');
-    inputs.forEach((input,index)=>{
-        input.addEventListener('input',e=>{
-            if(e.data && index<inputs.length-1) inputs[index+1].focus();
-            else if(e.inputType==='deleteContentBackward' && index>0 && !input.value) inputs[index-1].focus();
+    const inputs = document.querySelectorAll('#otp-container .otp-input');
+    inputs.forEach((input, idx)=>{
+        input.addEventListener('input', (e)=>{
+            if(e.data && idx < inputs.length-1){ inputs[idx+1].focus(); }
+            else if(e.inputType==='deleteContentBackward' && idx>0 && !input.value){ inputs[idx-1].focus(); }
         });
     });
 }
-async function hashPassword(password){
-    const buffer = new TextEncoder().encode(password);
-    const hash = await crypto.subtle.digest('SHA-256', buffer);
-    return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
 
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded', ()=>{
     setupOtpInputs();
-    const forgotForm=document.getElementById('forgotForm');
-    const phoneInput=document.getElementById('forgot-phone');
-    const otpContainer=document.getElementById('otp-input-container');
-    const newPasswordGroup=document.getElementById('new-password-group');
-    const submitBtn=document.getElementById('submit-btn');
-    const recaptchaContainer=document.getElementById('recaptcha-container');
 
-    window.recaptchaVerifier=new firebase.auth.RecaptchaVerifier(recaptchaContainer,{
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container',{
         'size':'invisible',
-        'callback':()=>{displayError("Verification complete. Click GET OTP.");},
-        'expired-callback':()=>{displayError("Recaptcha expired. Please retry.");}
+        'callback':()=>{ console.log("Recaptcha solved"); }
     });
-    recaptchaVerifier.render().catch(e=>displayError("Recaptcha render error: "+e.message));
 
-    forgotForm.addEventListener('submit',async(e)=>{
+    const forgotForm = document.getElementById('forgotForm');
+    const phoneInput = document.getElementById('phone');
+    const otpContainer = document.getElementById('otp-container');
+    const passwordGroup = document.getElementById('new-password-group');
+    const submitBtn = document.getElementById('submit-btn');
+
+    forgotForm.addEventListener('submit', async (e)=>{
         e.preventDefault();
         const phone = phoneInput.value.trim();
-        const password = document.getElementById('forgot-password').value;
-        const otpInputs=document.querySelectorAll('.otp-input');
-        const enteredOTP=Array.from(otpInputs).map(i=>i.value).join('');
+        const password = document.getElementById('new-password').value;
+        const otpInputs = document.querySelectorAll('#otp-container .otp-input');
+        const enteredOTP = Array.from(otpInputs).map(i=>i.value).join('');
 
         if(currentStep===1){
-            if(!phone.startsWith('+') || phone.length<10){ displayError("Enter valid phone in +91XXXXXXXXXX format."); return; }
+            if(!phone.startsWith('+') || phone.length<10){ displayError("Invalid phone"); return; }
             submitBtn.disabled=true; submitBtn.textContent='SENDING...';
             try{
                 const userQuery = await db.collection('users').where('phone','==',phone).limit(1).get();
-                if(userQuery.empty){ displayError("Phone not registered."); submitBtn.disabled=false; submitBtn.textContent='GET OTP'; return; }
-                userDocId=userQuery.docs[0].id;
+                if(userQuery.empty){ displayError("Phone not registered"); submitBtn.disabled=false; submitBtn.textContent='GET OTP'; return; }
+                userDocId = userQuery.docs[0].id;
                 confirmationResult = await auth.signInWithPhoneNumber(phone, window.recaptchaVerifier);
-                document.getElementById('phone-input-group').style.display='none';
+                phoneInput.parentElement.style.display='none';
                 otpContainer.style.display='flex';
-                recaptchaContainer.style.display='none';
                 submitBtn.textContent='VERIFY OTP';
-                submitBtn.disabled=false;
-                currentStep=2;
-                displayError("OTP sent successfully.");
-            }catch(error){ console.error(error); displayError(error.message); submitBtn.disabled=false; submitBtn.textContent='GET OTP'; }
-        } else if(currentStep===2){
-            if(enteredOTP.length<6){ displayError("Enter complete OTP."); return; }
+                submitBtn.disabled=false; currentStep=2;
+                displayError("OTP sent");
+            }catch(err){ console.error(err); displayError("OTP send failed"); submitBtn.disabled=false; submitBtn.textContent='GET OTP'; }
+        }
+        else if(currentStep===2){
+            if(enteredOTP.length<5){ displayError("Enter complete OTP"); return; }
             submitBtn.disabled=true; submitBtn.textContent='VERIFYING...';
             try{
                 await confirmationResult.confirm(enteredOTP);
                 otpContainer.style.display='none';
-                newPasswordGroup.style.display='block';
+                passwordGroup.style.display='block';
                 submitBtn.textContent='RESET PASSWORD';
                 submitBtn.disabled=false;
                 currentStep=3;
                 displayError("OTP verified. Enter new password.");
-            }catch(error){ console.error(error); displayError("Invalid OTP."); submitBtn.disabled=false; submitBtn.textContent='VERIFY OTP'; }
-        } else if(currentStep===3){
-            if(password.length<6 || password.length>16){ displayError("Password 6-16 characters."); return; }
+            }catch(err){ console.error(err); displayError("Invalid OTP"); submitBtn.disabled=false; submitBtn.textContent='VERIFY OTP'; }
+        }
+        else if(currentStep===3){
+            if(password.length<6){ displayError("Password too short"); return; }
             submitBtn.disabled=true; submitBtn.textContent='UPDATING...';
             try{
-                const hashed = await hashPassword(password);
-                if(!userDocId) throw new Error("User ID missing. Refresh.");
-                await db.collection('users').doc(userDocId).update({password:hashed});
-                alert("Password reset successful! Login with new password.");
+                const hashed = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
+                const hashStr = Array.from(new Uint8Array(hashed)).map(b=>b.toString(16).padStart(2,'0')).join('');
+                await db.collection('users').doc(userDocId).update({password: hashStr});
+                alert("Password reset successful! Login now.");
                 window.location.href='login.html';
-            }catch(error){ console.error(error); displayError(error.message); submitBtn.disabled=false; submitBtn.textContent='RESET PASSWORD'; }
+            }catch(err){ console.error(err); displayError("Reset failed"); submitBtn.disabled=false; submitBtn.textContent='RESET PASSWORD'; }
         }
     });
 });
