@@ -1,45 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Russian Club - Forgot Password</title>
-<style>
-body { font-family: Arial, sans-serif; margin:0; padding:0; background:#1a1a1a; color:#f0f0f0; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:10vh;}
-.container { max-width:450px; width:95%; }
-.auth-card { background:rgba(255,255,255,0.05); backdrop-filter:blur(10px); padding:25px 20px; border-radius:18px; border:1px solid rgba(255,255,255,0.2); }
-.auth-card h2 { color:#ffc700; text-align:center; margin-bottom:20px; }
-.input-group { position:relative; margin-bottom:18px; }
-.auth-input { width:100%; padding:12px 12px 12px 40px; border-radius:10px; border:1px solid rgba(255,255,255,0.3); background:rgba(0,0,0,0.3); color:#f0f0f0; }
-.otp-input { width:18%; height:50px; text-align:center; font-size:1.5em; margin-right:5px; }
-.submit-button { width:100%; padding:15px; border:none; border-radius:30px; font-weight:bold; color:white; background:linear-gradient(90deg,#e50074,#ff0099); cursor:pointer; }
-#recaptcha-container { margin:15px 0; display:flex; justify-content:center; }
-#error-message { color:#ffc700; text-align:center; margin-bottom:15px; display:none; }
-#otp-container, #new-password-group { display:none; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russian Club - Forgot Password</title>
+    
+    <style>
+        /* ------------------- MAIN STYLES ------------------- */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 10vh;
+        }
+        .container {
+            max-width: 450px;
+            width: 95%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .page-header {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header-text {
+            line-height: 1.2;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+            display: inline-flex;
+            align-items: center;
+            font-size: 1.8em; 
+            font-weight: 800;
+        }
+        .header-text span {
+            padding: 5px 10px;
+            color: white; 
+        }
+        .header-text .russian-color {
+            color: #e50074; 
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px 0 0 8px;
+            font-weight: 900;
+        }
+        .header-text .club-color {
+            color: white;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 0 8px 8px 0;
+            font-weight: 700;
+        }
+
+        .auth-card {
+            width: 90%;
+            padding: 25px 20px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px) saturate(180%);
+            -webkit-backdrop-filter: blur(10px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .auth-card h2 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 1.6em;
+            color: #ffc700;
+            text-shadow: 0 0 8px rgba(255, 199, 0, 0.5);
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+            position: relative;
+        }
+        .input-group > img {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            filter: invert(70%);
+        }
+        .auth-input {
+            width: 100%;
+            padding: 12px 12px 12px 50px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background-color: rgba(0, 0, 0, 0.3);
+            color: #f0f0f0;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .auth-input:focus {
+            border-color: #ffc700;
+            box-shadow: 0 0 8px rgba(255, 199, 0, 0.5);
+            outline: none;
+        }
+        .auth-input::placeholder {
+            color: #aaa;
+        }
+
+        /* --- OTP Specific Styles --- */
+        #otp-input-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            display: none; /* Initial hide */
+        }
+        .otp-input {
+            width: 13%; /* Adjusted for 6 inputs */
+            height: 50px;
+            text-align: center;
+            font-size: 1.5em;
+            padding: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.3);
+            color: #f0f0f0;
+        }
+
+        /* --- New Password Group --- */
+        #new-password-group {
+            display: none; /* Initial hide */
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #e50074, #ff0099);
+            color: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+            box-shadow: 0 6px 15px rgba(229, 0, 116, 0.4);
+        }
+        .submit-button:hover {
+            background: linear-gradient(90deg, #ff0099, #e50074);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(229, 0, 116, 0.6);
+        }
+
+        #error-message {
+            color: #ffc700;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+        }
+        /* Recaptcha container styling for visibility */
+        #recaptcha-container {
+            margin-top: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
+    <div class="page-header">
+        <div class="header-text">
+            <span class="russian-color">RUSSIAN</span><span class="club-color">CLUB</span>
+        </div>
+    </div>
+
     <div class="auth-card">
         <h2>Forgot Password</h2>
         <div id="error-message"></div>
+
         <form id="forgotForm">
-            <div class="input-group" id="phone-group">
-                <input type="tel" id="phone" class="auth-input" placeholder="Phone (+91XXXXXXXXXX)" required>
+            <div id="phone-input-group" class="input-group">
+                <img src="https://img.icons8.com/ios-filled/20/aaaaaa/phone.png" alt="Phone Icon">
+                <input type="tel" id="forgot-phone" class="auth-input" placeholder="Enter Phone Number (e.g., +91XXXXXXXXXX or XXXXXXXXXX)" required>
             </div>
+            
             <div id="recaptcha-container"></div>
 
-            <div id="otp-container">
-                <input type="number" class="otp-input" maxlength="1" required>
-                <input type="number" class="otp-input" maxlength="1" required>
-                <input type="number" class="otp-input" maxlength="1" required>
-                <input type="number" class="otp-input" maxlength="1" required>
-                <input type="number" class="otp-input" maxlength="1" required>
+            <div id="otp-input-container">
+                <input type="number" class="otp-input" id="otp-1" maxlength="1" required>
+                <input type="number" class="otp-input" id="otp-2" maxlength="1" required>
+                <input type="number" class="otp-input" id="otp-3" maxlength="1" required>
+                <input type="number" class="otp-input" id="otp-4" maxlength="1" required>
+                <input type="number" class="otp-input" id="otp-5" maxlength="1" required> 
+                <input type="number" class="otp-input" id="otp-6" maxlength="1" required> 
             </div>
 
-            <div class="input-group" id="new-password-group">
-                <input type="password" id="new-password" class="auth-input" placeholder="Enter new password" required>
+            <div id="new-password-group" class="input-group">
+                <img src="https://img.icons8.com/ios-filled/20/aaaaaa/lock.png" alt="Password Icon">
+                <input type="password" id="forgot-password" class="auth-input" placeholder="Enter New Password (min 6 chars)" required>
             </div>
 
             <button type="submit" id="submit-btn" class="submit-button">GET OTP</button>
@@ -52,123 +218,265 @@ body { font-family: Arial, sans-serif; margin:0; padding:0; background:#1a1a1a; 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 <script>
-// ---------------- Firebase Config ----------------
-var firebaseConfig = {
-    apiKey: "AIzaSyDlEY_2bDv25T5GTCzTEk7sQIZrAxh5irc",
-  authDomain: "russian-club.firebaseapp.com",
-  databaseURL: "https://russian-club-default-rtdb.firebaseio.com",
-  projectId: "russian-club",
-  storageBucket: "russian-club.appspot.com",
-  messagingSenderId: "659659196153",
-  appId: "1:659659196153:web:d6aaa4650fcff3d5fa0428",
-  measurementId: "G-5M46DNJ1YP"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+    var firebaseConfig = {
+        apiKey: "AIzaSyDlEY_2bDv25T5GTCzTEk7sQIZR-axh5irc",
+        authDomain: "russian-club.firebaseapp.com",
+        databaseURL: "https://russian-club-default-rtdb.firebaseio.com",
+        projectId: "russian-club",
+        storageBucket: "russian-club.appspot.com",
+        messagingSenderId: "1096848291195",
+        appId: "1:1096848291195:web:2c8c12e9c6c913f83210c7",
+        measurementId: "G-5M46DNJ1YP"
+    };
 
-let currentStep = 1;
-let confirmationResult = null;
-let userDocId = null;
+    if (!window.firebase) {
+         alert("CRITICAL ERROR: Firebase SDK not loaded. Check your internet or browser security settings.");
+    }
 
-// ---------------- Utility ----------------
-function displayError(msg){
-    const e = document.getElementById('error-message');
-    e.style.display='block'; e.textContent=msg;
-    console.log("[ERROR] "+msg);
-    setTimeout(()=>{e.style.display='none';},7000);
-}
+    if (!firebase.apps.length) { 
+        try {
+            firebase.initializeApp(firebaseConfig);
+        } catch (e) {
+            alert("CRITICAL ERROR: Firebase initialization failed: " + e.message);
+        }
+    }
+    
+    if (!firebase.auth || !firebase.firestore) {
+        alert("CRITICAL ERROR: Firebase Auth/Firestore SDKs not initialized. Scripts blocked.");
+    }
 
-function setupOtpInputs(){
-    const inputs = document.querySelectorAll('#otp-container .otp-input');
-    inputs.forEach((input, idx)=>{
-        input.addEventListener('input', (e)=>{
-            if(e.data && idx < inputs.length-1){ inputs[idx+1].focus(); }
-            else if(e.inputType==='deleteContentBackward' && idx>0 && !input.value){ inputs[idx-1].focus(); }
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let currentStep = 1; 
+    let confirmationResult = null; 
+    let userDocId = null; 
+    let fullPhoneNumber = null; // Variable to store the phone number in +E.164 format for Firebase Auth
+
+    // --- Utility Functions ---
+    async function hashPassword(password) {
+        const msgBuffer = new TextEncoder().encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function displayError(message) {
+        const errorElement = document.getElementById('error-message');
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        setTimeout(() => { errorElement.style.display = 'none'; }, 5000);
+    }
+    
+    function setupOtpInputs() {
+        const inputs = document.querySelectorAll('.otp-input');
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                // Limit input to 1 digit
+                if (input.value.length > 1) {
+                    input.value = input.value.slice(0, 1);
+                }
+                
+                if (input.value && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                } else if (e.inputType === 'deleteContentBackward' && index > 0 && !input.value) {
+                    inputs[index - 1].focus();
+                }
+            });
+            // Auto-advance on paste for the first input
+            if (index === 0) {
+                 input.addEventListener('paste', (e) => {
+                    const paste = e.clipboardData.getData('text');
+                    if (paste.length === inputs.length) {
+                        e.preventDefault();
+                        Array.from(paste).forEach((char, i) => {
+                            if (i < inputs.length) {
+                                inputs[i].value = char;
+                            }
+                        });
+                        inputs[inputs.length - 1].focus();
+                    }
+                });
+            }
+        });
+    }
+
+    // --- Main Logic ---
+    document.addEventListener("DOMContentLoaded", function() {
+        setupOtpInputs();
+        
+        const forgotForm = document.getElementById('forgotForm');
+        const phoneInput = document.getElementById('forgot-phone');
+        const otpContainer = document.getElementById('otp-input-container');
+        const newPasswordGroup = document.getElementById('new-password-group');
+        const submitBtn = document.getElementById('submit-btn');
+        const recaptchaContainer = document.getElementById('recaptcha-container');
+
+        // Invisible Recaptcha Initialization
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(recaptchaContainer, {
+            'size': 'invisible', 
+            'callback': (response) => {
+                displayError("Verification complete. Click GET OTP.");
+            },
+            'expired-callback': () => {
+                displayError("Recaptcha expired. Please try again.");
+            }
+        });
+
+        recaptchaVerifier.render().then(function(widgetId) {
+            console.log("Invisible Recaptcha ready:", widgetId);
+        }).catch(function(error) {
+            console.error("Recaptcha Render Error:", error);
+            displayError(`Recaptcha Render Failed. Error: ${error.code}`); 
+        });
+
+
+        forgotForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            let phone = phoneInput.value.trim();
+            const password = document.getElementById('forgot-password').value;
+            const otpInputs = document.querySelectorAll('.otp-input');
+            const enteredOTP = Array.from(otpInputs).map(input => input.value).join('');
+
+            // Step 1: Send OTP 
+            if (currentStep === 1) {
+                if (phone.length < 10) {
+                    displayError("Please enter a valid phone number (min 10 digits).");
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'CHECKING...';
+
+                try {
+                    let userQuery;
+                    
+                    // Firestore is saving data WITHOUT +91, so we check the input AS-IS first
+                    // 1. Check if the phone number exists in Firestore (AS-IS, e.g., '1234567890')
+                    userQuery = await db.collection('users').where('phone', '==', phone).limit(1).get();
+                    
+                    if (userQuery.empty) {
+                        // 2. If not found AS-IS, check if the phone is entered with +91 (e.g., '+911234567890')
+                        // and try to search Firestore with the stripped number (e.g., '1234567890')
+                         if (phone.startsWith('+')) {
+                            const cleanPhone = phone.replace(/^\+91/, '').replace(/^\+/, '');
+                            userQuery = await db.collection('users').where('phone', '==', cleanPhone).limit(1).get();
+                        } else {
+                            // 3. If phone is entered without '+', assume it's Indian number and search for '+91...' format in Firestore
+                            const plus91Phone = `+91${phone}`;
+                            userQuery = await db.collection('users').where('phone', '==', plus91Phone).limit(1).get();
+                        }
+                    }
+
+                    if (userQuery.empty) {
+                         displayError("Phone number not registered. Please ensure you are using the correct number.");
+                         submitBtn.disabled = false;
+                         submitBtn.textContent = 'GET OTP';
+                         return;
+                    }
+                    
+                    // Phone number is found in Firestore. Now determine the correct +E.164 format for Firebase Auth.
+                    userDocId = userQuery.docs[0].id;
+                    const dbPhone = userQuery.docs[0].data().phone; // This is the phone format stored in DB
+                    
+                    // Determine the correct phone number format for Firebase Auth (must be +E.164)
+                    if (dbPhone.startsWith('+')) {
+                        fullPhoneNumber = dbPhone; // DB already has +E.164 format
+                    } else if (dbPhone.length === 10) {
+                        fullPhoneNumber = `+91${dbPhone}`; // Assume 10-digit numbers are Indian
+                    } else {
+                        // If DB data is inconsistent, use the input as fallback for now (risky, but keeps flow moving)
+                        fullPhoneNumber = phone.startsWith('+') ? phone : `+91${phone}`; 
+                    }
+                    
+                    submitBtn.textContent = 'SENDING...'; // Update button text again
+
+                    // 4. Firebase Auth: Send Verification Code
+                    confirmationResult = await auth.signInWithPhoneNumber(fullPhoneNumber, window.recaptchaVerifier);
+                    
+                    // UI update for Step 2
+                    document.getElementById('phone-input-group').style.display = 'none';
+                    otpContainer.style.display = 'flex';
+                    recaptchaContainer.style.display = 'none'; 
+                    submitBtn.textContent = 'VERIFY OTP';
+                    submitBtn.disabled = false;
+                    currentStep = 2;
+                    displayError(`OTP sent successfully to ${fullPhoneNumber}. Please check your phone.`);
+
+                } catch (error) {
+                    console.error("OTP Send Error:", error.code, error.message);
+                    
+                    if (error.code === 'auth/missing-verification-code' || error.code === 'auth/captcha-check-failed') {
+                           displayError("Verification check failed. Refresh and retry.");
+                    } else if (error.code === 'auth/unauthorized-domain') {
+                           displayError("Domain not authorized. Check Firebase console.");
+                    } else {
+                           displayError(`OTP Failed. Error: ${error.code}. Check phone format and try again.`);
+                    }
+                    
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'GET OTP';
+                }
+
+            // Step 2: Verify OTP 
+            } else if (currentStep === 2) {
+                // FIXED: Checking for 6 digits
+                if (enteredOTP.length !== 6) { displayError("Please enter the complete 6-digit OTP."); return; }
+                if (!confirmationResult) { displayError("Verification process not started. Try again."); return; }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'VERIFYING...';
+
+                try {
+                    await confirmationResult.confirm(enteredOTP);
+                    
+                    // UI update for Step 3
+                    otpContainer.style.display = 'none';
+                    newPasswordGroup.style.display = 'block';
+                    submitBtn.textContent = 'RESET PASSWORD';
+                    submitBtn.disabled = false;
+                    currentStep = 3;
+                    displayError("OTP verified successfully. Enter your new password.");
+
+                } catch (error) {
+                    console.error("OTP Verify Error:", error.code, error.message);
+                    displayError("Invalid OTP. Please try again or resend.");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'VERIFY OTP';
+                }
+            
+            // Step 3: Update Password in Firestore
+            } else if (currentStep === 3) {
+                if (password.length < 6 || password.length > 16) { displayError("Password must be 6-16 characters."); return; }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'UPDATING...';
+
+                try {
+                    const hashedPassword = await hashPassword(password);
+                    if (!userDocId) { throw new Error("User ID missing. Please refresh and try again."); }
+                    
+                    await db.collection('users').doc(userDocId).update({ password: hashedPassword });
+                    
+                    alert("Password reset successful! Please login with your new password.");
+                    window.location.href = 'login.html';
+
+                } catch (error) {
+                    console.error("Password Update Error:", error);
+                    displayError(`Password reset failed. ${error.message}`);
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'RESET PASSWORD';
+                }
+            }
         });
     });
-}
-
-// ---------------- Main ----------------
-document.addEventListener('DOMContentLoaded', ()=>{
-    setupOtpInputs();
-
-    // 🔹 Visible Recaptcha for testing
-    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container',{
-        'size':'normal', 
-        'callback':()=>{ console.log("Recaptcha solved"); displayError("Recaptcha verified"); },
-        'expired-callback':()=>{ displayError("Recaptcha expired"); }
-    });
-
-    window.recaptchaVerifier.render().then(widgetId=>{
-        console.log("Recaptcha ready. WidgetId:", widgetId);
-    });
-
-    const forgotForm = document.getElementById('forgotForm');
-    const phoneInput = document.getElementById('phone');
-    const otpContainer = document.getElementById('otp-container');
-    const passwordGroup = document.getElementById('new-password-group');
-    const submitBtn = document.getElementById('submit-btn');
-
-    forgotForm.addEventListener('submit', async (e)=>{
-        e.preventDefault();
-        const phone = phoneInput.value.trim();
-        const password = document.getElementById('new-password').value;
-        const otpInputs = document.querySelectorAll('#otp-container .otp-input');
-        const enteredOTP = Array.from(otpInputs).map(i=>i.value).join('');
-
-        try{
-            if(currentStep===1){
-                if(!phone.startsWith('+') || phone.length<10){ displayError("Invalid phone format"); return; }
-                submitBtn.disabled=true; submitBtn.textContent='SENDING...';
-                
-                const userQuery = await db.collection('users').where('phone','==',phone).limit(1).get();
-                if(userQuery.empty){ displayError("Phone not registered"); submitBtn.disabled=false; submitBtn.textContent='GET OTP'; return; }
-                userDocId = userQuery.docs[0].id;
-
-                console.log("[INFO] Sending OTP...");
-                confirmationResult = await auth.signInWithPhoneNumber(phone, window.recaptchaVerifier);
-                console.log("[INFO] OTP sent:", confirmationResult);
-                displayError("OTP sent. Check your phone.");
-                
-                phoneInput.parentElement.style.display='none';
-                otpContainer.style.display='flex';
-                submitBtn.textContent='VERIFY OTP';
-                submitBtn.disabled=false;
-                currentStep=2;
-
-            } else if(currentStep===2){
-                if(enteredOTP.length<5){ displayError("Enter complete OTP"); return; }
-                submitBtn.disabled=true; submitBtn.textContent='VERIFYING...';
-                console.log("[INFO] Verifying OTP...");
-                await confirmationResult.confirm(enteredOTP);
-                displayError("OTP verified. Enter new password.");
-                
-                otpContainer.style.display='none';
-                passwordGroup.style.display='block';
-                submitBtn.textContent='RESET PASSWORD';
-                submitBtn.disabled=false;
-                currentStep=3;
-
-            } else if(currentStep===3){
-                if(password.length<6){ displayError("Password too short"); return; }
-                submitBtn.disabled=true; submitBtn.textContent='UPDATING...';
-                const hashed = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(password));
-                const hashStr = Array.from(new Uint8Array(hashed)).map(b=>b.toString(16).padStart(2,'0')).join('');
-                await db.collection('users').doc(userDocId).update({password: hashStr});
-                alert("Password reset successful! Login now.");
-                window.location.href='login.html';
-            }
-        } catch(err){
-            console.error("[CATCH ERROR]", err);
-            displayError("Error: "+(err.message||err));
-            submitBtn.disabled=false;
-            if(currentStep===1) submitBtn.textContent='GET OTP';
-            if(currentStep===2) submitBtn.textContent='VERIFY OTP';
-            if(currentStep===3) submitBtn.textContent='RESET PASSWORD';
-        }
-    });
-});
+    
+    // 🔥 FINAL FIX: Temporary Global Error Catcher 🔥
+    window.onerror = function(message, source, lineno, colno, error) {
+        alert("JS ERROR (Line " + lineno + "): " + message);
+        return true; 
+    };
 </script>
+
 </body>
 </html>
