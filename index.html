@@ -5,21 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Russian Club - Forgot Password</title>
 <style>
-body {
-    font-family: Arial, sans-serif;
-    margin:0; padding:0;
-    background:#1a1a1a; color:#f0f0f0;
-    display:flex; flex-direction:column;
-    align-items:center; justify-content:flex-start;
-    padding-top:10vh;
-}
+body { font-family: Arial, sans-serif; margin:0; padding:0; background:#1a1a1a; color:#f0f0f0; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:10vh;}
 .container { max-width:450px; width:95%; }
-.auth-card {
-    background:rgba(255,255,255,0.05);
-    backdrop-filter:blur(10px);
-    padding:25px 20px; border-radius:18px;
-    border:1px solid rgba(255,255,255,0.2);
-}
+.auth-card { background:rgba(255,255,255,0.05); backdrop-filter:blur(10px); padding:25px 20px; border-radius:18px; border:1px solid rgba(255,255,255,0.2); }
 .auth-card h2 { color:#ffc700; text-align:center; margin-bottom:20px; }
 .input-group { position:relative; margin-bottom:18px; }
 .auth-input { width:100%; padding:12px 12px 12px 40px; border-radius:10px; border:1px solid rgba(255,255,255,0.3); background:rgba(0,0,0,0.3); color:#f0f0f0; }
@@ -87,8 +75,8 @@ let userDocId = null;
 function displayError(msg){
     const e = document.getElementById('error-message');
     e.style.display='block'; e.textContent=msg;
-    console.log(msg);
-    setTimeout(()=>{e.style.display='none';},5000);
+    console.log("[ERROR] "+msg);
+    setTimeout(()=>{e.style.display='none';},7000);
 }
 
 function setupOtpInputs(){
@@ -105,9 +93,10 @@ function setupOtpInputs(){
 document.addEventListener('DOMContentLoaded', ()=>{
     setupOtpInputs();
 
+    // 🔹 Visible Recaptcha for testing
     window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container',{
-        'size':'normal', // visible recaptcha
-        'callback':()=>{ console.log("Recaptcha solved"); },
+        'size':'normal', 
+        'callback':()=>{ console.log("Recaptcha solved"); displayError("Recaptcha verified"); },
         'expired-callback':()=>{ displayError("Recaptcha expired"); }
     });
 
@@ -130,31 +119,36 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
         try{
             if(currentStep===1){
-                if(!phone.startsWith('+') || phone.length<10){ displayError("Invalid phone"); return; }
+                if(!phone.startsWith('+') || phone.length<10){ displayError("Invalid phone format"); return; }
                 submitBtn.disabled=true; submitBtn.textContent='SENDING...';
+                
                 const userQuery = await db.collection('users').where('phone','==',phone).limit(1).get();
                 if(userQuery.empty){ displayError("Phone not registered"); submitBtn.disabled=false; submitBtn.textContent='GET OTP'; return; }
                 userDocId = userQuery.docs[0].id;
 
+                console.log("[INFO] Sending OTP...");
                 confirmationResult = await auth.signInWithPhoneNumber(phone, window.recaptchaVerifier);
-                console.log("OTP sent:", confirmationResult);
+                console.log("[INFO] OTP sent:", confirmationResult);
+                displayError("OTP sent. Check your phone.");
+                
                 phoneInput.parentElement.style.display='none';
                 otpContainer.style.display='flex';
                 submitBtn.textContent='VERIFY OTP';
                 submitBtn.disabled=false;
                 currentStep=2;
-                displayError("OTP sent. Check your phone.");
 
             } else if(currentStep===2){
                 if(enteredOTP.length<5){ displayError("Enter complete OTP"); return; }
                 submitBtn.disabled=true; submitBtn.textContent='VERIFYING...';
+                console.log("[INFO] Verifying OTP...");
                 await confirmationResult.confirm(enteredOTP);
+                displayError("OTP verified. Enter new password.");
+                
                 otpContainer.style.display='none';
                 passwordGroup.style.display='block';
                 submitBtn.textContent='RESET PASSWORD';
                 submitBtn.disabled=false;
                 currentStep=3;
-                displayError("OTP verified. Enter new password.");
 
             } else if(currentStep===3){
                 if(password.length<6){ displayError("Password too short"); return; }
@@ -166,7 +160,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
                 window.location.href='login.html';
             }
         } catch(err){
-            console.error("ERROR:", err);
+            console.error("[CATCH ERROR]", err);
             displayError("Error: "+(err.message||err));
             submitBtn.disabled=false;
             if(currentStep===1) submitBtn.textContent='GET OTP';
