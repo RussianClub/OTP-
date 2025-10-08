@@ -133,6 +133,26 @@
             color: #f0f0f0;
         }
 
+        /* --- Resend Container Style --- */
+        #resend-container {
+            text-align: center; 
+            margin-bottom: 15px; 
+            display: none;
+        }
+        #resend-link {
+            color: #ffc700; 
+            text-decoration: none; 
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        #resend-link:hover:not(.disabled) {
+            color: #fff;
+        }
+        #resend-link.disabled {
+            cursor: not-allowed;
+            color: #666;
+        }
         /* --- New Password Group --- */
         #new-password-group {
             display: none; /* Initial hide */
@@ -204,6 +224,11 @@
                 <input type="number" class="otp-input" id="otp-5" maxlength="1"> 
                 <input type="number" class="otp-input" id="otp-6" maxlength="1"> 
             </div>
+            
+            <!-- NEW: Resend Link Container -->
+            <div id="resend-container">
+                <a href="#" id="resend-link"></a>
+            </div>
 
             <!-- Removed 'required' from Password input. JS handles validation when it is visible. -->
             <div id="new-password-group" class="input-group">
@@ -222,7 +247,6 @@
 
 <script>
     // --- UPDATED FIREBASE CONFIGURATION ---
-    // This config uses the corrected API Key and other parameters you provided.
     var firebaseConfig = {
         apiKey: "AIzaSyDlEY_2bDv25T5GTCzTEk7sQIZrAxh5irc", 
         authDomain: "russian-club.firebaseapp.com",
@@ -269,9 +293,9 @@
 
     function displayError(message) {
         const errorElement = document.getElementById('error-message');
-        errorElement.textContent = message;
+        errorElement.innerHTML = message; // Use innerHTML to allow HTML in messages
         errorElement.style.display = 'block';
-        setTimeout(() => { errorElement.style.display = 'none'; }, 5000);
+        setTimeout(() => { errorElement.style.display = 'none'; }, 7000); // Increased time
     }
     
     function setupOtpInputs() {
@@ -308,6 +332,31 @@
         });
     }
 
+    // --- NEW: Resend Countdown Function ---
+    function startResendCountdown(duration) {
+        let timer = duration;
+        const resendLink = document.getElementById('resend-link');
+        const resendContainer = document.getElementById('resend-container');
+        
+        resendContainer.style.display = 'block';
+        resendLink.classList.add('disabled'); // Disable link initially
+
+        const countdownInterval = setInterval(() => {
+            let seconds = parseInt(timer % 60, 10);
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            resendLink.textContent = `Resend OTP in ${seconds}s`;
+
+            if (--timer < 0) {
+                clearInterval(countdownInterval);
+                resendLink.textContent = 'Resend OTP';
+                resendLink.classList.remove('disabled'); // Enable link
+            }
+        }, 1000);
+    }
+    // -------------------------------------
+
+
     // --- Main Logic ---
     document.addEventListener("DOMContentLoaded", function() {
         setupOtpInputs();
@@ -319,6 +368,8 @@
         const submitBtn = document.getElementById('submit-btn');
         const recaptchaContainer = document.getElementById('recaptcha-container');
         const newPasswordInput = document.getElementById('forgot-password');
+        const resendLink = document.getElementById('resend-link');
+
 
         // Invisible Recaptcha Initialization
         window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(recaptchaContainer, {
@@ -332,13 +383,41 @@
             }
         });
 
-        // NOTE: The Firebase SDK handles the actual rendering call internally during sign-in.
         recaptchaVerifier.render().then(function(widgetId) {
             console.log("Invisible Recaptcha ready:", widgetId);
         }).catch(function(error) {
             console.error("Recaptcha Render Error:", error.code, error.message);
             displayError(`Recaptcha Render Failed. Please check Firebase console configuration.`); 
         });
+
+
+        // --- NEW: Resend OTP Listener ---
+        resendLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            if (resendLink.classList.contains('disabled')) return; // Do nothing if countdown is active
+
+            resendLink.textContent = 'Resending...';
+            resendLink.classList.add('disabled');
+
+            try {
+                // Re-send OTP using the stored phone number and recaptchaVerifier
+                if (!fullPhoneNumber) {
+                     throw new Error("Phone number not saved. Please go back and retry.");
+                }
+                
+                confirmationResult = await auth.signInWithPhoneNumber(fullPhoneNumber, window.recaptchaVerifier);
+                
+                displayError(`New OTP sent successfully to ${fullPhoneNumber}.`);
+                startResendCountdown(30); // Start countdown again
+            } catch (error) {
+                console.error("Resend OTP Error:", error.code, error.message);
+                displayError(`Resend Failed. Error: ${error.code}. If you are testing, try whitelisting your number in the Firebase Auth console.`);
+                resendLink.textContent = 'Resend OTP Failed. Try again.';
+                resendLink.classList.remove('disabled');
+            }
+        });
+        // -------------------------------------
 
 
         forgotForm.addEventListener('submit', async (e) => {
@@ -423,7 +502,11 @@
                     submitBtn.textContent = 'VERIFY OTP';
                     submitBtn.disabled = false;
                     currentStep = 2;
-                    displayError(`OTP sent successfully to ${fullPhoneNumber}. Please check your phone.`);
+                    
+                    // Start Resend Countdown and show message
+                    startResendCountdown(30); 
+                    displayError(`OTP sent successfully to <strong>${fullPhoneNumber}</strong>. Please wait for the SMS. If you don't receive it, click 'Resend OTP' after the countdown.`);
+                    
                     // Focus on the first OTP input
                     document.getElementById('otp-1').focus();
 
@@ -436,7 +519,7 @@
                     } else if (error.code === 'auth/unauthorized-domain') {
                            displayError("Domain not authorized. Check Firebase console Authorized Domains.");
                     } else {
-                           displayError(`OTP Failed. Error: ${error.code}. Check phone format and retry.`);
+                           displayError(`OTP Failed. Error: ${error.code}. Check phone format and retry. If testing, please whitelist your number in Firebase Auth.`);
                     }
                     
                     submitBtn.disabled = false;
@@ -463,6 +546,7 @@
                     
                     // UI update for Step 3
                     otpContainer.style.display = 'none';
+                    document.getElementById('resend-container').style.display = 'none'; // Hide resend link
                     newPasswordGroup.style.display = 'block';
                     submitBtn.textContent = 'RESET PASSWORD';
                     submitBtn.disabled = false;
