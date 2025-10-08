@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Russian Club - Forgot Password</title>
+    <title>Russian Club - Forgot Password (Live OTP via MSG91)</title>
     
     <style>
-        /* ------------------- MAIN STYLES ------------------- */
+        /* ------------------- MAIN STYLES (Tailwind-like Custom CSS) ------------------- */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #1a1a1a;
@@ -18,15 +18,12 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            padding-top: 10vh;
+            padding-top: 8vh;
         }
         .container {
-            max-width: 450px;
+            max-width: 480px;
             width: 95%;
             margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
         .page-header {
             width: 100%;
@@ -60,29 +57,28 @@
         }
 
         .auth-card {
-            width: 90%;
-            padding: 25px 20px;
+            width: 100%;
+            padding: 30px 25px;
             border-radius: 18px;
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px) saturate(180%);
             -webkit-backdrop-filter: blur(10px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            overflow: hidden;
             box-sizing: border-box;
         }
 
         .auth-card h2 {
             text-align: center;
             margin-top: 0;
-            margin-bottom: 25px;
-            font-size: 1.6em;
+            margin-bottom: 30px;
+            font-size: 1.8em;
             color: #ffc700;
             text-shadow: 0 0 8px rgba(255, 199, 0, 0.5);
         }
 
         .input-group {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
             position: relative;
         }
         .input-group > img {
@@ -96,63 +92,29 @@
         }
         .auth-input {
             width: 100%;
-            padding: 12px 12px 12px 50px;
+            padding: 14px 14px 14px 50px;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            background-color: rgba(0, 0, 0, 0.4);
             color: #f0f0f0;
-            font-size: 1em;
+            font-size: 1.05em;
             box-sizing: border-box;
             transition: border-color 0.3s, box-shadow 0.3s;
         }
         .auth-input:focus {
             border-color: #ffc700;
-            box-shadow: 0 0 8px rgba(255, 199, 0, 0.5);
+            box-shadow: 0 0 10px rgba(255, 199, 0, 0.6);
             outline: none;
         }
         .auth-input::placeholder {
             color: #aaa;
         }
 
-        /* --- OTP Specific Styles --- */
+        /* --- OTP Specific Styles (Hidden) --- */
         #otp-input-container {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 25px;
-            display: none; /* Initial hide */
-        }
-        .otp-input {
-            width: 13%; /* Adjusted for 6 inputs */
-            height: 50px;
-            text-align: center;
-            font-size: 1.5em;
-            padding: 5px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            background-color: rgba(0, 0, 0, 0.3);
-            color: #f0f0f0;
+            display: none; /* MSG91 widget handles OTP input */
         }
 
-        /* --- Resend Container Style --- */
-        #resend-container {
-            text-align: center; 
-            margin-bottom: 15px; 
-            display: none;
-        }
-        #resend-link {
-            color: #ffc700; 
-            text-decoration: none; 
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        #resend-link:hover:not(.disabled) {
-            color: #fff;
-        }
-        #resend-link.disabled {
-            cursor: not-allowed;
-            color: #666;
-        }
         /* --- New Password Group --- */
         #new-password-group {
             display: none; /* Initial hide */
@@ -160,36 +122,51 @@
 
         .submit-button {
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             background: linear-gradient(90deg, #e50074, #ff0099);
             color: white;
-            font-size: 1.1em;
+            font-size: 1.15em;
             font-weight: bold;
             border: none;
             border-radius: 30px;
             cursor: pointer;
             transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
-            box-shadow: 0 6px 15px rgba(229, 0, 116, 0.4);
+            box-shadow: 0 6px 15px rgba(229, 0, 116, 0.5);
         }
         .submit-button:hover {
             background: linear-gradient(90deg, #ff0099, #e50074);
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(229, 0, 116, 0.6);
+            box-shadow: 0 8px 25px rgba(229, 0, 116, 0.8);
         }
 
         #error-message {
+            background: rgba(255, 199, 0, 0.1);
             color: #ffc700;
+            padding: 10px;
+            border-radius: 8px;
             text-align: center;
-            margin-top: 15px;
+            margin-bottom: 20px;
             font-weight: bold;
+            border: 1px solid #ffc700;
             display: none;
         }
-        /* Recaptcha container styling for visibility */
+        
+        .security-warning {
+            background: #0d3a5a;
+            color: #a0d8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 5px solid #00aaff;
+            font-size: 0.9em;
+        }
+        .security-warning strong {
+            color: #fff;
+        }
+        
+        /* Recaptcha Container (not used) */
         #recaptcha-container {
-            margin-top: 15px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: center;
+            display: none; 
         }
     </style>
 </head>
@@ -203,50 +180,47 @@
     </div>
 
     <div class="auth-card">
-        <h2>Forgot Password</h2>
+        <h2>पासवर्ड रीसेट</h2>
+        
+        <div class="security-warning">
+            <p><strong>✅ MSG91 लाइव:</strong> OTP सत्यापन अब आपके द्वारा दिए गए **लाइव MSG91 टोकन** का उपयोग कर रहा है।</p>
+            <p><strong>सुरक्षा सूचना:</strong> यह टोकन अब सार्वजनिक रूप से HTML में उजागर है। MSG91 के नियमानुसार, यह विजेट के लिए ठीक है।</p>
+        </div>
+
         <div id="error-message"></div>
 
         <form id="forgotForm">
+            <!-- Step 1: Phone Input -->
             <div id="phone-input-group" class="input-group">
                 <img src="https://img.icons8.com/ios-filled/20/aaaaaa/phone.png" alt="Phone Icon">
-                <!-- Only the phone input is 'required' at step 1 -->
-                <input type="tel" id="forgot-phone" class="auth-input" placeholder="Enter Phone Number (e.g., +91XXXXXXXXXX or XXXXXXXXXX)" required>
+                <input type="tel" id="forgot-phone" class="auth-input" placeholder="पंजीकृत फ़ोन नंबर दर्ज करें (e.g., +91XXXXXXXXXX)" required>
             </div>
             
-            <div id="recaptcha-container"></div>
-
-            <!-- Removed 'required' from OTP inputs. JS handles validation when they are visible. -->
+            <!-- Step 2: MSG91 Verification (Handled by Widget Pop-up) -->
             <div id="otp-input-container">
-                <input type="number" class="otp-input" id="otp-1" maxlength="1">
-                <input type="number" class="otp-input" id="otp-2" maxlength="1">
-                <input type="number" class="otp-input" id="otp-3" maxlength="1">
-                <input type="number" class="otp-input" id="otp-4" maxlength="1">
-                <input type="number" class="otp-input" id="otp-5" maxlength="1"> 
-                <input type="number" class="otp-input" id="otp-6" maxlength="1"> 
-            </div>
-            
-            <!-- NEW: Resend Link Container -->
-            <div id="resend-container">
-                <a href="#" id="resend-link"></a>
+                <!-- This is intentionally empty, as the MSG91 script handles the verification UI -->
             </div>
 
-            <!-- Removed 'required' from Password input. JS handles validation when it is visible. -->
+            <!-- Step 3: New Password Input -->
             <div id="new-password-group" class="input-group">
                 <img src="https://img.icons8.com/ios-filled/20/aaaaaa/lock.png" alt="Password Icon">
-                <input type="password" id="forgot-password" class="auth-input" placeholder="Enter New Password (min 6 chars)">
+                <input type="password" id="forgot-password" class="auth-input" placeholder="नया पासवर्ड दर्ज करें (न्यूनतम 6 अक्षर)">
             </div>
 
-            <button type="submit" id="submit-btn" class="submit-button">GET OTP</button>
+            <button type="submit" id="submit-btn" class="submit-button">OTP प्राप्त करें</button>
         </form>
     </div>
 </div>
 
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
+<!-- MSG91 Script: Must be loaded after the main Firebase/app logic -->
+<script type="text/javascript" src="https://verify.msg91.com/otp-provider.js"> </script>
+
 <script>
-    // --- UPDATED FIREBASE CONFIGURATION ---
+    // --- FIREBASE CONFIGURATION ---
     var firebaseConfig = {
         apiKey: "AIzaSyDlEY_2bDv25T5GTCzTEk7sQIZrAxh5irc", 
         authDomain: "russian-club.firebaseapp.com",
@@ -257,31 +231,25 @@
         appId: "1:659659196153:web:d6aaa4650fcff3d5fa0428",
         measurementId: "G-5M46DNJ1YP"
     };
-    // ------------------------------------
-
-    if (!window.firebase) {
-         alert("CRITICAL ERROR: Firebase SDK not loaded. Check your internet or browser security settings.");
-    }
+    
+    // --- MSG91 CONFIGURATION PLACEHOLDERS ---
+    // NOTE: This is the LIVE token provided by the user. 
+    const MSG91_WIDGET_ID = "356a6869636a323831313235"; // Your Widget ID
+    const MSG91_AUTH_TOKEN = "472605TYOeU0mclVm68e62984P1"; // *** LIVE MSG91 TOKEN ***
+    // ------------------------------------------
 
     if (!firebase.apps.length) { 
         try {
             firebase.initializeApp(firebaseConfig);
         } catch (e) {
-            alert("CRITICAL ERROR: Firebase initialization failed: " + e.message);
+            console.error("CRITICAL ERROR: Firebase initialization failed: " + e.message);
         }
     }
     
-    if (!firebase.auth || !firebase.firestore) {
-        alert("CRITICAL ERROR: Firebase Auth/Firestore SDKs not initialized. Scripts blocked.");
-    }
-
-    const auth = firebase.auth();
     const db = firebase.firestore();
 
     let currentStep = 1; 
-    let confirmationResult = null; 
     let userDocId = null; 
-    let fullPhoneNumber = null; 
 
     // --- Utility Functions ---
     async function hashPassword(password) {
@@ -293,312 +261,153 @@
 
     function displayError(message) {
         const errorElement = document.getElementById('error-message');
-        errorElement.innerHTML = message; // Use innerHTML to allow HTML in messages
+        errorElement.innerHTML = message; 
         errorElement.style.display = 'block';
-        setTimeout(() => { errorElement.style.display = 'none'; }, 7000); // Increased time
+        setTimeout(() => { errorElement.style.display = 'none'; }, 7000); 
     }
     
-    function setupOtpInputs() {
-        const inputs = document.querySelectorAll('.otp-input');
-        inputs.forEach((input, index) => {
-            input.addEventListener('input', (e) => {
-                // Limit input to 1 digit
-                if (input.value.length > 1) {
-                    input.value = input.value.slice(0, 1);
-                }
-                
-                if (input.value && index < inputs.length - 1) {
-                    inputs[index + 1].focus();
-                } else if (e.inputType === 'deleteContentBackward' && index > 0 && !input.value) {
-                    inputs[index - 1].focus();
-                }
-            });
-            // Auto-advance on paste for the first input
-            if (index === 0) {
-                 input.addEventListener('paste', (e) => {
-                    const paste = e.clipboardData.getData('text');
-                    // Check if pasted content matches the required OTP length (6 digits)
-                    if (paste.length === inputs.length) {
-                        e.preventDefault();
-                        Array.from(paste).forEach((char, i) => {
-                            if (i < inputs.length) {
-                                inputs[i].value = char;
-                            }
-                        });
-                        inputs[inputs.length - 1].focus();
-                    }
-                });
-            }
-        });
-    }
-
-    // --- NEW: Resend Countdown Function ---
-    function startResendCountdown(duration) {
-        let timer = duration;
-        const resendLink = document.getElementById('resend-link');
-        const resendContainer = document.getElementById('resend-container');
+    // --- MSG91 Success Callback (STEP 2 -> STEP 3) ---
+    function handleOtpSuccess(data) {
+        console.log('MSG91 Success:', data);
         
-        resendContainer.style.display = 'block';
-        resendLink.classList.add('disabled'); // Disable link initially
+        // --- Transition to Step 3: Password Reset ---
+        const phoneInputGroup = document.getElementById('phone-input-group');
+        const newPasswordGroup = document.getElementById('new-password-group');
+        const submitBtn = document.getElementById('submit-btn');
+        const newPasswordInput = document.getElementById('forgot-password');
 
-        const countdownInterval = setInterval(() => {
-            let seconds = parseInt(timer % 60, 10);
-            seconds = seconds < 10 ? "0" + seconds : seconds;
-
-            resendLink.textContent = `Resend OTP in ${seconds}s`;
-
-            if (--timer < 0) {
-                clearInterval(countdownInterval);
-                resendLink.textContent = 'Resend OTP';
-                resendLink.classList.remove('disabled'); // Enable link
-            }
-        }, 1000);
+        phoneInputGroup.style.display = 'none'; // Hide phone
+        newPasswordGroup.style.display = 'block'; // Show new password
+        submitBtn.textContent = 'पासवर्ड रीसेट करें';
+        submitBtn.disabled = false;
+        currentStep = 3;
+        
+        displayError("OTP सफलतापूर्वक सत्यापित हुआ। अपना नया पासवर्ड दर्ज करें।");
+        newPasswordInput.focus();
     }
-    // -------------------------------------
-
+    
+    // --- MSG91 Failure Callback ---
+    function handleOtpFailure(error) {
+        console.error('MSG91 Failure:', error);
+        displayError(`OTP सत्यापन विफल: ${error?.reason || 'सत्यापन रद्द/असफल हुआ'}`);
+        
+        // Resetting button state
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.textContent = 'OTP प्राप्त करें';
+        submitBtn.disabled = false;
+        // Keep currentStep = 1, as the phone input is still visible
+    }
 
     // --- Main Logic ---
     document.addEventListener("DOMContentLoaded", function() {
-        setupOtpInputs();
         
         const forgotForm = document.getElementById('forgotForm');
         const phoneInput = document.getElementById('forgot-phone');
-        const otpContainer = document.getElementById('otp-input-container');
-        const newPasswordGroup = document.getElementById('new-password-group');
         const submitBtn = document.getElementById('submit-btn');
-        const recaptchaContainer = document.getElementById('recaptcha-container');
         const newPasswordInput = document.getElementById('forgot-password');
-        const resendLink = document.getElementById('resend-link');
-
-
-        // Invisible Recaptcha Initialization
-        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(recaptchaContainer, {
-            'size': 'invisible', 
-            'callback': (response) => {
-                // This callback should ideally not be visible for invisible reCAPTCHA
-                console.log("Invisible Recaptcha verification complete.");
-            },
-            'expired-callback': () => {
-                displayError("Recaptcha expired. Please refresh the page and try again.");
-            }
-        });
-
-        recaptchaVerifier.render().then(function(widgetId) {
-            console.log("Invisible Recaptcha ready:", widgetId);
-        }).catch(function(error) {
-            console.error("Recaptcha Render Error:", error.code, error.message);
-            displayError(`Recaptcha Render Failed. Please check Firebase console configuration.`); 
-        });
-
-
-        // --- NEW: Resend OTP Listener ---
-        resendLink.addEventListener('click', async (e) => {
-            e.preventDefault();
-            
-            if (resendLink.classList.contains('disabled')) return; // Do nothing if countdown is active
-
-            resendLink.textContent = 'Resending...';
-            resendLink.classList.add('disabled');
-
-            try {
-                // Re-send OTP using the stored phone number and recaptchaVerifier
-                if (!fullPhoneNumber) {
-                     throw new Error("Phone number not saved. Please go back and retry.");
-                }
-                
-                confirmationResult = await auth.signInWithPhoneNumber(fullPhoneNumber, window.recaptchaVerifier);
-                
-                displayError(`New OTP sent successfully to ${fullPhoneNumber}.`);
-                startResendCountdown(30); // Start countdown again
-            } catch (error) {
-                console.error("Resend OTP Error:", error.code, error.message);
-                displayError(`Resend Failed. Error: ${error.code}. If you are testing, try whitelisting your number in the Firebase Auth console.`);
-                resendLink.textContent = 'Resend OTP Failed. Try again.';
-                resendLink.classList.remove('disabled');
-            }
-        });
-        // -------------------------------------
-
 
         forgotForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            let phone = phoneInput.value.trim();
-            const password = newPasswordInput.value;
-            const otpInputs = document.querySelectorAll('.otp-input');
-            const enteredOTP = Array.from(otpInputs).map(input => input.value).join('');
+            const phone = phoneInput.value.trim();
+            const newPassword = newPasswordInput.value;
 
-            // Step 1: Send OTP 
+            // Step 1: Find Account by Phone Number and Initiate MSG91
             if (currentStep === 1) {
-                // Manual validation since HTML 'required' was removed from hidden inputs
-                if (!phone) {
-                    displayError("Please enter your phone number.");
-                    return;
-                }
-                if (phone.length < 10) {
-                    displayError("Please enter a valid phone number (min 10 digits).");
+                if (!phone || phone.length < 10) {
+                    displayError("कृपया एक वैध फ़ोन नंबर दर्ज करें (न्यूनतम 10 अंक)।");
                     return;
                 }
 
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'CHECKING...';
+                submitBtn.textContent = 'खाता ढूंढ रहा है...';
 
                 try {
                     let userQuery;
                     
-                    // --- Firestore Phone Number Matching Logic (Handles +91 or no +91) ---
-                    // 1. Check for AS-IS match (e.g., '6202313102')
+                    // --- Firestore Phone Number Matching Logic ---
                     userQuery = await db.collection('users').where('phone', '==', phone).limit(1).get();
-                    
                     if (userQuery.empty) {
-                        // 2. If not found AS-IS, try to normalize/clean the input phone for searching.
                         let searchPhone = phone;
                         if (phone.startsWith('+')) {
-                            // If user entered +91XXXXXXXXXX, search for XXXXXXXXXX (without +91)
                             searchPhone = phone.replace(/^\+91/, '').replace(/^\+/, '');
                         } 
-                        
-                        // Try searching with the cleaned version (e.g., '1234567890')
                         userQuery = await db.collection('users').where('phone', '==', searchPhone).limit(1).get();
                         
-                        if (userQuery.empty) {
-                            // 3. Last resort: If still not found, assume 10 digit input and search for '+91XXXXXXXXXX'
-                            if (searchPhone.length === 10) {
-                                const plus91Phone = `+91${searchPhone}`;
-                                userQuery = await db.collection('users').where('phone', '==', plus91Phone).limit(1).get();
-                            }
+                        if (userQuery.empty && searchPhone.length === 10) {
+                            const plus91Phone = `+91${searchPhone}`;
+                            userQuery = await db.collection('users').where('phone', '==', plus91Phone).limit(1).get();
                         }
                     }
                     // --- End of Matching Logic ---
 
                     if (userQuery.empty) {
-                         displayError("Phone number not registered. Please ensure you are using the correct number.");
+                         displayError("यह फ़ोन नंबर पंजीकृत नहीं है। कृपया सही नंबर दर्ज करें।");
                          submitBtn.disabled = false;
-                         submitBtn.textContent = 'GET OTP';
+                         submitBtn.textContent = 'OTP प्राप्त करें';
                          return;
                     }
                     
+                    // User found. Store Doc ID.
                     userDocId = userQuery.docs[0].id;
-                    const dbPhone = userQuery.docs[0].data().phone; 
                     
-                    // Determine the correct +E.164 format for Firebase Auth
-                    if (dbPhone.startsWith('+')) {
-                        fullPhoneNumber = dbPhone; 
-                    } else if (dbPhone.length === 10) {
-                        fullPhoneNumber = `+91${dbPhone}`; 
+                    submitBtn.textContent = 'OTP भेज रहा है... (पॉप-अप देखें)';
+                    
+                    // --- Initiate MSG91 OTP Widget ---
+                    const configuration = {
+                        widgetId: MSG91_WIDGET_ID,
+                        tokenAuth: MSG91_AUTH_TOKEN, 
+                        identifier: phone,
+                        success: handleOtpSuccess, // Use the defined success function
+                        failure: handleOtpFailure, // Use the defined failure function
+                    };
+                    
+                    // Check if the MSG91 script has loaded
+                    if (typeof initSendOTP === 'function') {
+                        initSendOTP(configuration);
                     } else {
-                        // Fallback, use the found number but ensure +91 prefix if it's a 10-digit number
-                        fullPhoneNumber = dbPhone.length === 10 ? `+91${dbPhone}` : dbPhone;
+                        throw new Error("MSG91 स्क्रिप्ट लोड नहीं हुई है।");
                     }
-                    
-                    submitBtn.textContent = 'SENDING...'; 
-
-                    // Firebase Auth: Send Verification Code
-                    confirmationResult = await auth.signInWithPhoneNumber(fullPhoneNumber, window.recaptchaVerifier);
-                    
-                    // UI update for Step 2
-                    document.getElementById('phone-input-group').style.display = 'none';
-                    otpContainer.style.display = 'flex';
-                    // Do NOT hide recaptcha container, it's invisible anyway.
-                    submitBtn.textContent = 'VERIFY OTP';
-                    submitBtn.disabled = false;
-                    currentStep = 2;
-                    
-                    // Start Resend Countdown and show message
-                    startResendCountdown(30); 
-                    displayError(`OTP sent successfully to <strong>${fullPhoneNumber}</strong>. Please wait for the SMS. If you don't receive it, click 'Resend OTP' after the countdown.`);
-                    
-                    // Focus on the first OTP input
-                    document.getElementById('otp-1').focus();
+                    // MSG91 widget takes over UI interaction here. 
+                    // We don't change currentStep yet, it changes only on successful callback.
+                    // The button remains disabled until success/failure callback runs.
 
 
                 } catch (error) {
-                    console.error("OTP Send Error:", error.code, error.message);
-                    
-                    if (error.code === 'auth/internal-error' && error.message.includes('API key not valid')) {
-                           displayError("CRITICAL: API Key Invalid. Please check Google Cloud Console settings.");
-                    } else if (error.code === 'auth/unauthorized-domain') {
-                           displayError("Domain not authorized. Check Firebase console Authorized Domains.");
-                    } else {
-                           displayError(`OTP Failed. Error: ${error.code}. Check phone format and retry. If testing, please whitelist your number in Firebase Auth.`);
-                    }
-                    
+                    console.error("Account Search/OTP Init Error:", error.message);
+                    displayError(`खोज/OTP आरम्भ विफल: ${error.message}`);
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'GET OTP';
-                }
-
-            // Step 2: Verify OTP 
-            } else if (currentStep === 2) {
-                // Manual validation for 6-digit OTP
-                if (enteredOTP.length !== 6) { 
-                    displayError("Please enter the complete 6-digit OTP."); 
-                    return; 
-                }
-                if (!confirmationResult) { 
-                    displayError("Verification process not started. Try again."); 
-                    return; 
-                }
-
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'VERIFYING...';
-
-                try {
-                    await confirmationResult.confirm(enteredOTP);
-                    
-                    // UI update for Step 3
-                    otpContainer.style.display = 'none';
-                    document.getElementById('resend-container').style.display = 'none'; // Hide resend link
-                    newPasswordGroup.style.display = 'block';
-                    submitBtn.textContent = 'RESET PASSWORD';
-                    submitBtn.disabled = false;
-                    currentStep = 3;
-                    displayError("OTP verified successfully. Enter your new password.");
-                    newPasswordInput.focus();
-
-                } catch (error) {
-                    console.error("OTP Verify Error:", error.code, error.message);
-                    displayError("Invalid OTP. Please try again or resend.");
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'VERIFY OTP';
+                    submitBtn.textContent = 'OTP प्राप्त करें';
                 }
             
+            // Step 2 (Skipped - Handled by MSG91)
+
             // Step 3: Update Password in Firestore
             } else if (currentStep === 3) {
-                // Manual validation for password
-                if (password.length < 6 || password.length > 16) { 
-                    displayError("Password must be 6-16 characters long."); 
+                if (newPassword.length < 6 || newPassword.length > 16) { 
+                    displayError("पासवर्ड 6-16 अक्षरों का होना चाहिए।"); 
                     return; 
                 }
 
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'UPDATING...';
+                submitBtn.textContent = 'अपडेट कर रहा है...';
 
                 try {
-                    const hashedPassword = await hashPassword(password);
-                    if (!userDocId) { throw new Error("User ID missing. Please refresh and try again."); }
+                    const hashedPassword = await hashPassword(newPassword);
+                    if (!userDocId) { throw new Error("उपयोगकर्ता ID गुम है। कृपया पुन: प्रयास करें।"); }
                     
                     await db.collection('users').doc(userDocId).update({ password: hashedPassword });
                     
-                    alert("Password reset successful! Please login with your new password.");
-                    // NOTE: Use window.location.href to redirect, not 'login.html' if that's not the exact file name
-                    // Assuming you want to go back to the login page.
-                    // window.location.href = 'login.html'; 
-
+                    displayError("🎉 पासवर्ड सफलतापूर्वक रीसेट हुआ! कृपया अपने नए पासवर्ड से लॉगिन करें।");
+                    
                 } catch (error) {
                     console.error("Password Update Error:", error);
-                    displayError(`Password reset failed. ${error.message}`);
+                    displayError(`पासवर्ड रीसेट विफल हुआ। ${error.message}`);
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'RESET PASSWORD';
+                    submitBtn.textContent = 'पासवर्ड रीसेट करें';
                 }
             }
         });
     });
-    
-    // 🔥 FINAL FIX: Temporary Global Error Catcher 🔥
-    window.onerror = function(message, source, lineno, colno, error) {
-        // Prevent generic JS errors from blocking the console too much
-        console.error("JS Runtime Error (Line " + lineno + "): " + message);
-        return true; 
-    };
 </script>
 
 </body>
